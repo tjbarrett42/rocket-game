@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rocket Builder</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div id="app">
+    <div id="sidebar">
+      <h1>ROCKET BUILDER</h1>
+      <div id="palette"></div>
+      <div id="stats"></div>
+      <div id="stage-editor">
+        <div class="stage-header">STAGES</div>
+        <div id="stage-list"></div>
+      </div>
+      <div id="ship-manager">
+        <div class="stage-header">SHIPS</div>
+        <div id="ship-name-row">
+          <input id="ship-name" type="text" placeholder="Ship name..." value="Untitled">
+        </div>
+        <div id="ship-buttons">
+          <button id="save-btn">SAVE</button>
+          <button id="load-btn">LOAD</button>
+        </div>
+        <div id="ship-list"></div>
+      </div>
+      <button id="launch-btn" disabled>LAUNCH</button>
+      <button id="abort-btn">ABORT</button>
+      <button id="clear-btn">CLEAR</button>
+    </div>
+    <canvas id="canvas"></canvas>
+    <div id="right-panel">
+      <div class="panel-header">VEHICLE</div>
+      <canvas id="schematic-canvas"></canvas>
+      <div id="fuel-readout"></div>
+    </div>
+    <div id="hud"></div>
+    <div id="controls-help">Drag parts onto the build area</div>
+    <div id="message"></div>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

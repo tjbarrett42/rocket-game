@@ -1,0 +1,369 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #0a0a1a;
+  color: #d0d0d0;
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  user-select: none;
+}
+
+#app {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#sidebar {
+  width: 210px;
+  min-width: 210px;
+  background: #111128;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-right: 2px solid #1a1a3e;
+  z-index: 10;
+}
+
+h1 {
+  font-size: 15px;
+  color: #ff4060;
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+#canvas {
+  flex: 1;
+  display: block;
+  min-width: 0;
+  height: 100vh;
+  cursor: default;
+}
+
+#palette {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.part-btn {
+  padding: 7px 10px;
+  border: 2px solid #1a1a3e;
+  border-radius: 5px;
+  background: #0d0d20;
+  color: #d0d0d0;
+  cursor: grab;
+  font-family: inherit;
+  font-size: 11px;
+  text-align: left;
+  transition: border-color 0.15s;
+}
+
+.part-btn:hover {
+  border-color: #ff4060;
+  background: #151530;
+}
+
+.part-btn:active { cursor: grabbing; }
+
+.part-name {
+  font-weight: bold;
+  display: block;
+}
+
+.part-info {
+  font-size: 9px;
+  color: #666;
+  margin-top: 2px;
+}
+
+#stats {
+  font-size: 10px;
+  line-height: 1.7;
+  border-top: 1px solid #1a1a3e;
+  padding-top: 8px;
+}
+
+.stat-row { display: flex; justify-content: space-between; }
+.stat-label { color: #666; }
+.stat-value { color: #4a9eff; font-weight: bold; }
+.stat-warn { color: #ff4060; }
+
+#stage-editor {
+  border-top: 1px solid #1a1a3e;
+  padding-top: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.stage-header {
+  font-size: 10px;
+  color: #666;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.stage-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 4px;
+  border-radius: 3px;
+  margin-bottom: 2px;
+  background: #0d0d20;
+  border: 1px solid transparent;
+}
+
+.stage-row:hover { border-color: #1a1a3e; }
+.stage-row.next-stage { border-color: #ff406044; }
+
+.stage-num {
+  font-size: 9px;
+  color: #555;
+  width: 14px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.stage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.stage-action {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 2px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.stage-action.engine {
+  background: #2a1a08;
+  color: #ffaa44;
+  border: 1px solid #553311;
+}
+
+.stage-action.decouple, .stage-action.radial-decouple {
+  background: #0a2a0a;
+  color: #44cc66;
+  border: 1px solid #225522;
+}
+
+.stage-action:hover {
+  border-color: #ff4060 !important;
+}
+
+.stage-action.highlighted {
+  border-color: #ff4060 !important;
+  box-shadow: 0 0 4px #ff406066;
+}
+
+#ship-manager {
+  border-top: 1px solid #1a1a3e;
+  padding-top: 6px;
+}
+
+#ship-name {
+  width: 100%;
+  padding: 4px 6px;
+  background: #0d0d20;
+  border: 1px solid #1a1a3e;
+  border-radius: 3px;
+  color: #d0d0d0;
+  font-family: inherit;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+#ship-name:focus { border-color: #4a9eff; outline: none; }
+
+#ship-buttons {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+#ship-buttons button {
+  flex: 1;
+  padding: 4px;
+  border: 1px solid #1a1a3e;
+  border-radius: 3px;
+  background: #0d0d20;
+  color: #aaa;
+  font-family: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+#ship-buttons button:hover { border-color: #4a9eff; color: #d0d0d0; }
+
+#ship-list {
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.ship-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 4px;
+  font-size: 9px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.ship-entry:hover { background: #1a1a3e; }
+
+.ship-entry .ship-entry-name { color: #aaa; }
+.ship-entry .ship-entry-parts { color: #555; }
+
+.ship-entry-del {
+  color: #ff406088;
+  cursor: pointer;
+  padding: 0 4px;
+  font-size: 11px;
+}
+
+.ship-entry-del:hover { color: #ff4060; }
+
+#right-panel {
+  width: 170px;
+  min-width: 170px;
+  background: #111128;
+  border-left: 2px solid #1a1a3e;
+  display: none;
+  flex-direction: column;
+  padding: 8px;
+  z-index: 10;
+}
+
+#right-panel .panel-header {
+  font-size: 10px;
+  color: #666;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+#schematic-canvas {
+  width: 100%;
+  height: 280px;
+  background: #0a0a14;
+  border-radius: 3px;
+  border: 1px solid #1a1a3e;
+  margin-bottom: 6px;
+}
+
+#fuel-readout {
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.link-btn {
+  padding: 4px;
+  border: 1px solid #1a1a3e;
+  border-radius: 3px;
+  background: #0d0d20;
+  color: #aaa;
+  font-family: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.link-btn:hover { border-color: #44cccc; color: #44cccc; }
+.link-btn.active { border-color: #44cccc; color: #44cccc; background: #0d1a1a; }
+
+#launch-btn, #abort-btn, #clear-btn {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+#launch-btn {
+  background: #22cc66;
+  color: #0a0a1a;
+  margin-top: auto;
+}
+
+#launch-btn:disabled {
+  background: #333;
+  color: #666;
+  cursor: not-allowed;
+}
+
+#abort-btn {
+  background: #ff4060;
+  color: white;
+  display: none;
+}
+
+#clear-btn {
+  background: #333;
+  color: #aaa;
+  font-size: 11px;
+  padding: 6px;
+}
+
+#clear-btn:hover { background: #444; }
+
+#hud {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.75);
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 1.7;
+  display: none;
+  z-index: 20;
+  min-width: 160px;
+}
+
+.hud-label { color: #666; }
+.hud-value { color: #4a9eff; }
+.hud-warn { color: #ff4060; }
+
+#controls-help {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 5px 14px;
+  border-radius: 5px;
+  font-size: 10px;
+  color: #555;
+  z-index: 20;
+}
+
+#message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 28px;
+  font-weight: bold;
+  text-align: center;
+  z-index: 30;
+  display: none;
+  text-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+  line-height: 1.5;
+}
+
+#message .sub {
+  font-size: 13px;
+  font-weight: normal;
+  color: #888;
+}
