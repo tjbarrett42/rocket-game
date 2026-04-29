@@ -27,6 +27,7 @@ const fuelPanel = new FuelPanel(
 let selectedPartId: number | null = null;
 let lastTime = 0;
 const particles: ExhaustParticle[] = [];
+const exhaustTrail: { x: number; y: number; age: number; thrust: number }[] = [];
 const debris: Debris[] = [];
 const keys = new Set<string>();
 
@@ -763,6 +764,7 @@ launchBtn.addEventListener('click', () => {
   rocket.resetStaging();
   rocket.autoAssignStages();
   particles.length = 0;
+  exhaustTrail.length = 0;
   debris.length = 0;
   trajectory.length = 0;
   prediction = [];
@@ -1056,56 +1058,29 @@ function handleFlightInput(dt: number) {
 
 // --- Exhaust particles ---
 
-function spawnExhaust(dt: number) {
-  if (sim.throttle <= 0 || (rocket.stagedMainThrust <= 0 && rocket.stagedRadialThrust <= 0)) return;
+function updateExhaustTrail(dt: number) {
+  const thrusting = sim.throttle > 0 && (rocket.stagedMainThrust > 0 || rocket.stagedRadialThrust > 0);
 
-  const count = Math.ceil(sim.throttle * 8 * dt * 60);
-  const h = rocket.totalHeight;
-
-  for (let i = 0; i < count; i++) {
-    const spread = rocket.maxWidth * 0.3;
-    const localX = (Math.random() - 0.5) * spread;
-    const localY = -h * 0.02;
-
-    const cos = Math.cos(sim.angle);
-    const sin = Math.sin(sim.angle);
-    const wx = sim.x + sin * localY + cos * localX;
-    const wy = sim.y + cos * localY - sin * localX;
-
-    const speed = 20 + Math.random() * 40;
-    const jitter = (Math.random() - 0.5) * 8;
-
-    particles.push({
-      x: wx,
-      y: wy,
-      vx: sim.vx + (-sin * speed + jitter),
-      vy: sim.vy + (-cos * speed + jitter),
-      life: 0.3 + Math.random() * 0.4,
-      maxLife: 0.5,
-      size: 0.15 + Math.random() * 0.2,
+  // Add current nozzle position to trail
+  if (thrusting) {
+    exhaustTrail.push({
+      x: sim.x,
+      y: sim.y,
+      age: 0,
+      thrust: sim.throttle,
     });
   }
-}
 
-function updateParticles(dt: number) {
-  for (let i = particles.length - 1; i >= 0; i--) {
-    const p = particles[i];
-    // Apply gravity (same as everything else in the sim)
-    const pdx = -p.x;
-    const pdy = -(p.y + PLANET.radius);
-    const pDist = Math.sqrt(pdx * pdx + pdy * pdy);
-    if (pDist > 0) {
-      const g = PLANET.GM / (pDist * pDist);
-      p.vx += (g * pdx / pDist) * dt;
-      p.vy += (g * pdy / pDist) * dt;
-    }
-    p.x += p.vx * dt;
-    p.y += p.vy * dt;
-    p.life -= dt;
-    if (p.life <= 0) {
-      particles.splice(i, 1);
+  // Age and cull trail points
+  for (let i = exhaustTrail.length - 1; i >= 0; i--) {
+    exhaustTrail[i].age += dt;
+    if (exhaustTrail[i].age > 2.0) {
+      exhaustTrail.splice(i, 1);
     }
   }
+
+  // Cap trail length
+  while (exhaustTrail.length > 150) exhaustTrail.shift();
 }
 
 // --- Trajectory ---
@@ -1295,10 +1270,9 @@ function loop(timestamp: number) {
 
     if (!hasLiftedOff && sim.altitude > 5) hasLiftedOff = true;
 
-    if (timeWarp <= 2) {
-      spawnExhaust(dt);
+    if (timeWarp <= 5) {
+      updateExhaustTrail(dt);
     }
-    updateParticles(dt * timeWarp);
     updateTrajectory();
 
     predictionTimer += dt;
@@ -1312,7 +1286,7 @@ function loop(timestamp: number) {
     renderer.clear(canvas.width, canvas.height);
 
     if (viewMode === 0) {
-      renderer.renderFlight(canvas.width, canvas.height, rocket, sim, particles, debris, flightZoom);
+      renderer.renderFlight(canvas.width, canvas.height, rocket, sim, exhaustTrail, debris, flightZoom);
     } else if (viewMode === 1) {
       renderer.renderLocalMap(canvas.width, canvas.height, sim, trajectory, prediction, debris, localZoom);
     } else {

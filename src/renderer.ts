@@ -130,7 +130,7 @@ export class Renderer {
     w: number, h: number,
     rocket: Rocket,
     sim: Simulation,
-    particles: ExhaustParticle[],
+    exhaustTrail: { x: number; y: number; age: number; thrust: number }[],
     debris: Debris[],
     zoomMultiplier: number,
   ) {
@@ -241,15 +241,25 @@ export class Renderer {
       ctx.fill();
     }
 
-    // Exhaust particles
-    for (const p of particles) {
-      const px = toLocalX(p.x);
-      const py = toLocalY(p.y);
-      const alpha = p.life / p.maxLife;
-      ctx.fillStyle = `rgba(255,${Math.floor(200 * alpha + 50)},${Math.floor(50 * alpha)},${alpha * 0.8})`;
-      ctx.beginPath();
-      ctx.arc(px, py, p.size * scale * alpha + 1, 0, Math.PI * 2);
-      ctx.fill();
+    // Exhaust trail
+    if (exhaustTrail.length > 1) {
+      for (let i = 0; i < exhaustTrail.length; i++) {
+        const t = exhaustTrail[i];
+        const alpha = Math.max(0, 1 - t.age / 2.0);
+        if (alpha <= 0) continue;
+        const px = toLocalX(t.x);
+        const py = toLocalY(t.y);
+        const size = (0.3 + t.age * 0.8) * scale;
+        // Color: hot near rocket → grey smoke older
+        const heat = Math.max(0, 1 - t.age * 2);
+        const r = Math.floor(255 * heat + 150 * (1 - heat));
+        const g = Math.floor(200 * heat + 140 * (1 - heat));
+        const b = Math.floor(50 * heat + 130 * (1 - heat));
+        ctx.fillStyle = `rgba(${r},${g},${b},${alpha * 0.4 * t.thrust})`;
+        ctx.beginPath();
+        ctx.arc(px, py, Math.max(size, 1.5), 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
 
     // Debris
